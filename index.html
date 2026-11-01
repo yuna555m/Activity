@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نشاط صنّف البنود</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: one column of a timer header, a question banner, four classification rows, and a footer with the score and controls. */
+:root {
+  --bg: #F3F5F7; --fg: #0F1F33; --card: #FFFFFF; --line: #D3DAE2; --muted: #3E4F61;
+  --ink: #0F1F33; --on-ink: #FFFFFF;
+  --banner-bg: #0F1F33; --banner-fg: #FFFFFF; --tag-bg: #8CCABD; --tag-fg: #0F1F33;
+  --num-bg: #E3EEF7; --num-fg: #1F5A8A;
+  --info: #1F5A8A; --cyber: #0B5D52; --both: #0F1F33;
+  --ok: #0F5B33; --ok-bg: #DDF0E4; --ok-line: #1B7F4B;
+  --bad: #8A1C16; --bad-bg: #FBE4E1; --bad-line: #B3261E;
+  --dim: #5B6B7C; --dim-line: #C5D0DB; --time-low: #B3261E;
+  --font: 'Tajawal', Calibri, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1620; --fg: #E8EEF4; --card: #16212E; --line: #2A3A4C; --muted: #A9B7C6;
+    --ink: #E8EEF4; --on-ink: #0E1620;
+    --banner-bg: #1B2D44; --banner-fg: #FFFFFF; --tag-bg: #8CCABD; --tag-fg: #0F1F33;
+    --num-bg: #1E3347; --num-fg: #8CC4F0;
+    --info: #8CC4F0; --cyber: #6FD3C1; --both: #E8EEF4;
+    --ok: #7FDDA3; --ok-bg: #17382A; --ok-line: #3FAE72;
+    --bad: #FF9A92; --bad-bg: #3F1D1B; --bad-line: #E5645B;
+    --dim: #9AABBD; --dim-line: #3A4B5E; --time-low: #FF8A80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1620; --fg: #E8EEF4; --card: #16212E; --line: #2A3A4C; --muted: #A9B7C6;
+  --ink: #E8EEF4; --on-ink: #0E1620;
+  --banner-bg: #1B2D44; --banner-fg: #FFFFFF; --tag-bg: #8CCABD; --tag-fg: #0F1F33;
+  --num-bg: #1E3347; --num-fg: #8CC4F0;
+  --info: #8CC4F0; --cyber: #6FD3C1; --both: #E8EEF4;
+  --ok: #7FDDA3; --ok-bg: #17382A; --ok-line: #3FAE72;
+  --bad: #FF9A92; --bad-bg: #3F1D1B; --bad-line: #E5645B;
+  --dim: #9AABBD; --dim-line: #3A4B5E; --time-low: #FF8A80;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 18px;
+  padding-block: 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button { font-family: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--num-fg); outline-offset: 2px; }
+.wrap { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; }
+.titles { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pill { align-self: flex-start; padding: 6px 20px; background: var(--ink); color: var(--on-ink); font-size: 18px; font-weight: 700; border-radius: 999px; }
+h1 { margin: 0; font-size: clamp(30px, 5vw, 52px); line-height: 1.25; font-weight: 800; text-wrap: balance; }
+.timer { display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; }
+.time { min-width: 130px; text-align: center; font-size: 48px; line-height: 1.2; font-weight: 800; font-variant-numeric: tabular-nums; direction: ltr; }
+.time.low { color: var(--time-low); }
+.btn { height: 48px; padding: 0 24px; border: 2px solid var(--ink); border-radius: 14px; font-size: 20px; font-weight: 800; background: var(--ink); color: var(--on-ink); }
+.btn.alt { background: var(--card); color: var(--fg); border-color: var(--fg); }
+.banner { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 20px 28px; background: var(--banner-bg); border-radius: 20px; }
+.banner .tag { flex-shrink: 0; padding: 6px 20px; background: var(--tag-bg); color: var(--tag-fg); font-size: 22px; font-weight: 800; border-radius: 999px; }
+.banner .q { flex: 1 1 320px; min-width: 0; font-size: clamp(22px, 3vw, 32px); line-height: 1.45; font-weight: 800; color: var(--banner-fg); }
+.rows { display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 18px 24px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; }
+.num { flex-shrink: 0; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; background: var(--num-bg); color: var(--num-fg); border-radius: 50%; font-size: 26px; font-weight: 800; }
+.body { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.item { font-size: 28px; line-height: 1.4; font-weight: 800; }
+.fb { font-size: 20px; line-height: 1.6; font-weight: 500; }
+.fb.good { color: var(--ok); } .fb.bad { color: var(--bad); } .fb.neutral { color: var(--fg); }
+.choices { display: flex; flex-wrap: wrap; gap: 10px; }
+.choice { width: 200px; max-width: 100%; height: 60px; padding: 0 8px; border-radius: 14px; font-size: 21px; line-height: 1.3; font-weight: 800; background: var(--card); border: 2px solid var(--c); color: var(--c); }
+.choice.right { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok); }
+.choice.wrong { background: var(--bad-bg); border-color: var(--bad-line); color: var(--bad); }
+.choice.answer { border: 2px dashed var(--ok-line); color: var(--ok); background: var(--card); }
+.choice.faded { border-color: var(--dim-line); color: var(--dim); background: var(--card); }
+.foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; }
+.summary { font-size: 22px; font-weight: 500; color: var(--muted); min-width: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.actions .btn { height: 52px; font-size: 22px; padding: 0 28px; }
+@media (max-width: 560px) {
+  .timer { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+  .choice { flex: 1 1 100%; width: auto; }
+}
+@media (prefers-reduced-motion: no-preference) { .choice, .btn { transition: background-color .15s, border-color .15s; } }
+</style>
+
+</head>
+<body>
+<main class="wrap" dir="rtl" lang="ar">
+  <header class="top">
+    <div class="titles">
+      <div class="pill">نشاط مصغر · ١٠ دقائق</div>
+      <h1>نشاط تفاعلي: صنّف البنود</h1>
+    </div>
+    <div class="timer">
+      <span class="time" id="time" aria-live="off">٠٠:٠٠</span>
+      <button type="button" class="btn" id="start">ابدأ</button>
+      <button type="button" class="btn alt" id="resetTimer">إعادة</button>
+    </div>
+  </header>
+
+  <section class="banner">
+    <div class="tag">سؤال جماعي</div>
+    <div class="q">صنّف البنود التالية: هل تنتمي لأمن المعلومات أم الأمن السيبراني؟</div>
+  </section>
+
+  <section class="rows" id="rows" aria-label="البنود"></section>
+
+  <footer class="foot">
+    <div class="summary" id="summary" aria-live="polite"></div>
+    <div class="actions">
+      <button type="button" class="btn" id="reveal">إظهار الإجابات</button>
+      <button type="button" class="btn alt" id="resetAll">إعادة النشاط</button>
+    </div>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var TOTAL = 600;
+  var OPTS = [
+    { id: 'info', label: 'أمن المعلومات', color: 'var(--info)' },
+    { id: 'cyber', label: 'الأمن السيبراني', color: 'var(--cyber)' },
+    { id: 'both', label: 'كلاهما', color: 'var(--both)' }
+  ];
+  var ITEMS = [
+    { text: 'خزانة ملفات ورقية مقفلة', ans: 'info', ansLabel: 'أمن معلومات (فيزيائي)', exp: 'الورق خارج نطاق الأمن السيبراني.' },
+    { text: 'جدار حماية شبكة', ans: 'cyber', ansLabel: 'أمن سيبراني', exp: 'يحمي الشبكة من الهجمات الرقمية.' },
+    { text: 'سياسة كلمات المرور', ans: 'both', ansLabel: 'كلاهما', exp: 'تحمي المعلومات والأنظمة الرقمية معاً.' },
+    { text: 'تشفير قرص صلب', ans: 'both', ansLabel: 'كلاهما', exp: 'يحمي البيانات الرقمية المخزّنة.' }
+  ];
+  var digits = '٠١٢٣٤٥٦٧٨٩';
+  function ar(n) { return String(n).replace(/[0-9]/g, function (d) { return digits[Number(d)]; }); }
+
+  var picks = {}, revealed = false, running = false, secs = TOTAL, timerId = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function renderTimer() {
+    var mm = Math.floor(secs / 60), ss = secs % 60;
+    var t = $('time');
+    t.textContent = ar(String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0'));
+    t.className = 'time' + (secs <= 60 ? ' low' : '');
+    $('start').textContent = running ? 'إيقاف مؤقت' : (secs === TOTAL ? 'ابدأ' : (secs === 0 ? 'من جديد' : 'استئناف'));
+  }
+  function tick() {
+    if (!running) return;
+    if (secs <= 1) { secs = 0; running = false; } else { secs -= 1; }
+    renderTimer();
+  }
+  function renderRows() {
+    var box = $('rows');
+    box.innerHTML = '';
+    var answered = 0, correct = 0;
+    ITEMS.forEach(function (it, i) {
+      var pick = picks[i], has = pick !== undefined;
+      if (has) { answered++; if (pick === it.ans) correct++; }
+      var showFb = has || revealed;
+      var row = document.createElement('div'); row.className = 'row';
+      var num = document.createElement('div'); num.className = 'num'; num.textContent = ar(i + 1);
+      var body = document.createElement('div'); body.className = 'body';
+      var txt = document.createElement('div'); txt.className = 'item'; txt.textContent = it.text;
+      body.appendChild(txt);
+      if (showFb) {
+        var fb = document.createElement('div');
+        if (has && pick === it.ans) { fb.className = 'fb good'; fb.textContent = '✓ صحيح: ' + it.ansLabel + '. ' + it.exp; }
+        else if (has) { fb.className = 'fb bad'; fb.textContent = '✗ الإجابة الصحيحة: ' + it.ansLabel + '. ' + it.exp; }
+        else { fb.className = 'fb neutral'; fb.textContent = 'الإجابة: ' + it.ansLabel + '. ' + it.exp; }
+        body.appendChild(fb);
+      }
+      var ch = document.createElement('div'); ch.className = 'choices';
+      OPTS.forEach(function (o) {
+        var b = document.createElement('button'); b.type = 'button';
+        var cls = 'choice', label = o.label;
+        if (has && pick === o.id && pick === it.ans) { cls += ' right'; label = '✓ ' + o.label; }
+        else if (has && pick === o.id) { cls += ' wrong'; label = '✗ ' + o.label; }
+        else if (showFb && o.id === it.ans) { cls += ' answer'; label = '✓ ' + o.label; }
+        else if (showFb) { cls += ' faded'; }
+        b.className = cls; b.style.setProperty('--c', o.color); b.textContent = label;
+        b.addEventListener('click', function () { picks[i] = o.id; renderRows(); });
+        ch.appendChild(b);
+      });
+      row.appendChild(num); row.appendChild(body); row.appendChild(ch);
+      box.appendChild(row);
+    });
+    $('summary').textContent = answered === 0
+      ? 'اختر تصنيفاً لكل بند لتظهر الإجابة'
+      : 'أُجيب عن ' + ar(answered) + ' من ' + ar(ITEMS.length) + ' — الصحيح: ' + ar(correct);
+    $('reveal').textContent = revealed ? 'إخفاء الإجابات' : 'إظهار الإجابات';
+  }
+
+  $('start').addEventListener('click', function () {
+    if (secs === 0) { secs = TOTAL; running = true; } else { running = !running; }
+    renderTimer();
+  });
+  $('resetTimer').addEventListener('click', function () { secs = TOTAL; running = false; renderTimer(); });
+  $('reveal').addEventListener('click', function () { revealed = !revealed; renderRows(); });
+  $('resetAll').addEventListener('click', function () { picks = {}; revealed = false; secs = TOTAL; running = false; renderTimer(); renderRows(); });
+
+  timerId = setInterval(tick, 1000);
+  renderTimer();
+  renderRows();
+})();
+</script>
+</body>
+</html>
